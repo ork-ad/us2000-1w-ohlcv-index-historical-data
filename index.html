@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<!--
+  GitHub Pages — landing asset (ork.ad style)
+  Édite ce fichier, puis regénère :
+    .venv/bin/python3 -m pipeline.github.pages --dev
+    .venv/bin/python3 -m pipeline.github.pages --preview EURUSD
+
+  Placeholders {{NAME}} — remplis par pipeline/pages_builder.py
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080808">
+  <title>US2000 1w OHLCV Index Historical Data — Free Sample</title>
+  <meta name="description" content="US2000 1w OHLCV Stock index — free sample candlestick chart. Full historical data on ork.ad.">
+  <link rel="canonical" href="https://ork-ad.github.io/us2000-1w-ohlcv-index-historical-data/">
+  <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+  <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
+  <style>
+    :root {
+      --accent:       #c8cdd3;
+      --accent-hi:    #e8eaed;
+      --accent-dim:   rgba(200, 205, 211, 0.14);
+      --accent-border:rgba(200, 205, 211, 0.38);
+
+      --bg-0:  #080808;
+      --bg-1:  #0e0e0e;
+      --bg-2:  #141414;
+      --bg-3:  #1a1a1a;
+
+      --line-0: rgba(255,255,255,0.06);
+      --line-1: rgba(255,255,255,0.10);
+      --line-2: rgba(255,255,255,0.16);
+
+      --silver-ring: linear-gradient(
+        145deg,
+        rgba(255, 255, 255, 0.38) 0%,
+        rgba(200, 205, 211, 0.26) 24%,
+        rgba(90, 98, 110, 0.16) 50%,
+        rgba(200, 205, 211, 0.3) 76%,
+        rgba(255, 255, 255, 0.22) 100%
+      );
+      --surface-ring-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.05),
+        0 28px 56px -16px rgba(0, 0, 0, 0.72),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+
+      --text-hi:  #f2f2f2;
+      --text-mid: rgba(242,242,242,0.65);
+      --text-lo:  rgba(242,242,242,0.38);
+
+      --font-sans: 'Clash Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --font-display: 'Clash Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --font-mono: 'SFMono-Regular', 'Fira Code', ui-monospace, monospace;
+
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+
+      --up: #00c853;
+      --down: #ff1744;
+
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    html, body { min-height: 100%; }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-0);
+      color: var(--text-hi);
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    ::selection { background: var(--accent); color: #080808; }
+
+    a { color: var(--accent); text-decoration: none; transition: color 0.18s var(--ease-out); }
+    a:hover { color: var(--accent-hi); }
+
+    .page-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(200, 205, 211, 0.08) 0%, transparent 55%),
+        radial-gradient(ellipse 60% 40% at 80% 60%, rgba(200, 205, 211, 0.04) 0%, transparent 50%),
+        var(--bg-0);
+    }
+
+    .page-bg::before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 140%; height: 140%;
+      min-width: 900px; min-height: 900px;
+      border-radius: 50%;
+      background: conic-gradient(
+        from 0deg,
+        rgba(200,205,211,0.12) 0%,
+        transparent 6%,
+        transparent 62%,
+        rgba(200,205,211,0.03) 78%,
+        rgba(200,205,211,0.08) 94%,
+        rgba(200,205,211,0.12) 100%
+      );
+      animation: bg-spin 18s linear infinite;
+      filter: blur(2px);
+      opacity: 0.6;
+    }
+
+    @keyframes bg-spin {
+      from { transform: translate(-50%, -50%) rotate(0deg); }
+      to   { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .page-bg::before { animation: none; }
+      .hero { animation: none; }
+    }
+
+    .shell {
+      position: relative;
+      z-index: 1;
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 0 clamp(1.25rem, 4vw, 2.5rem) 3rem;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 0 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .brand {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.125rem;
+      letter-spacing: -0.02em;
+      color: var(--text-hi);
+      text-transform: lowercase;
+    }
+
+    .brand span {
+      color: var(--text-lo);
+      font-weight: 500;
+      margin-left: 0.15rem;
+    }
+
+    .topbar-links {
+      display: flex;
+      gap: 1.25rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+    }
+
+    .topbar-links a { color: var(--text-mid); }
+    .topbar-links a:hover { color: var(--accent); }
+
+    .hero {
+      margin-bottom: 2rem;
+      animation: hero-enter 0.75s var(--ease-out) both;
+    }
+
+    @keyframes hero-enter {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.3rem 0.7rem;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--line-1);
+      font-family: var(--font-display);
+      font-size: 0.6875rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-mid);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .pill.sym {
+      background: var(--accent-dim);
+      color: var(--accent);
+      border-color: var(--accent-border);
+    }
+
+    h1 {
+      font-family: var(--font-display);
+      font-size: clamp(1.75rem, 4vw, 2.5rem);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.08;
+      margin: 0 0 0.75rem;
+      max-width: 22ch;
+      background: linear-gradient(180deg, #ffffff 15%, #c8cdd3 55%, #8f96a3 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .lead {
+      color: var(--text-mid);
+      max-width: 62ch;
+      margin: 0;
+      font-size: clamp(0.9rem, 1.4vw, 1.02rem);
+      line-height: 1.65;
+    }
+
+    .lead strong { color: var(--text-hi); font-weight: 600; }
+
+    .update-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 1rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--text-mid);
+    }
+
+    .update-badge::before {
+      content: '';
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--up);
+      box-shadow: 0 0 8px rgba(0, 200, 83, 0.5);
+    }
+
+    .cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      height: 40px;
+      padding: 0 1.15rem;
+      border-radius: 9999px;
+      font-family: var(--font-display);
+      font-weight: 500;
+      font-size: 0.8125rem;
+      border: 1px solid transparent;
+      transition: all 0.18s var(--ease-out);
+      cursor: pointer;
+      white-space: nowrap;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(180deg, var(--accent-hi) 0%, var(--accent) 100%);
+      color: #0a0a0a;
+      border-color: rgba(255, 255, 255, 0.22);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(180deg, #ffffff 0%, #d1d5db 100%);
+      color: #0a0a0a;
+      border-color: rgba(255, 255, 255, 0.35);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(200, 205, 211, 0.22);
+    }
+
+    .btn-ghost {
+      background: rgba(8, 8, 8, 0.35);
+      color: var(--text-hi);
+      border: 1px solid var(--accent-border);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 8px 20px -12px rgba(0, 0, 0, 0.45);
+    }
+
+    .btn-ghost:hover {
+      background: rgba(255, 255, 255, 0.96);
+      color: #000;
+      border-color: rgba(255, 255, 255, 0.85);
+      transform: translateY(-1px);
+    }
+
+    .stats {
+      display: grid;
+      gap: 1px;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      margin: 2rem 0;
+      border: 1px solid var(--line-0);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: var(--line-0);
+    }
+
+    .stat {
+      background: var(--bg-1);
+      padding: 1.1rem 1.15rem;
+      transition: background 0.18s var(--ease-out);
+    }
+
+    .stat:hover { background: var(--bg-2); }
+
+    .stat label {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 0.6875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 0.35rem;
+    }
+
+    .stat strong {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--text-hi);
+    }
+
+    .stat small {
+      display: block;
+      color: var(--text-lo);
+      font-size: 0.75rem;
+      margin-top: 0.2rem;
+    }
+
+    .panel-wrap {
+      position: relative;
+      padding: 1px;
+      border-radius: var(--radius-lg);
+      background: var(--silver-ring);
+      box-shadow: var(--surface-ring-shadow);
+      margin-bottom: 1.5rem;
+      isolation: isolate;
+      overflow: hidden;
+    }
+
+    .panel-wrap::after {
+      content: '';
+      position: absolute;
+      inset: 1px;
+      border-radius: calc(var(--radius-lg) - 1px);
+      pointer-events: none;
+      z-index: 2;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.14),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.35);
+    }
+
+    .panel {
+      position: relative;
+      z-index: 1;
+      background: rgba(8, 8, 8, 0.92);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: calc(var(--radius-lg) - 1px);
+      overflow: hidden;
+    }
+
+    .panel-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.85rem 1.15rem;
+      border-bottom: 1px solid rgba(200, 205, 211, 0.1);
+      background: rgba(8, 8, 8, 0.55);
+    }
+
+    .panel-head h2 {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-hi);
+      letter-spacing: -0.01em;
+    }
+
+    .panel-head .sub {
+      color: var(--text-lo);
+      font-size: 0.75rem;
+      margin-top: 0.15rem;
+    }
+
+    .ohlc-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      padding: 0.5rem 1.15rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      border-bottom: 1px solid rgba(200, 205, 211, 0.1);
+      background: rgba(8, 8, 8, 0.72);
+    }
+
+    .ohlc-bar span { color: var(--text-lo); }
+    .ohlc-bar b { color: var(--text-hi); font-weight: 500; }
+    .ohlc-bar .up { color: var(--up); }
+    .ohlc-bar .down { color: var(--down); }
+
+    #chart { width: 100%; height: 420px; background: var(--bg-0); }
+    #volume-chart { width: 100%; height: 100px; border-top: 1px solid rgba(200, 205, 211, 0.08); background: var(--bg-0); }
+
+    .banner {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.25rem;
+      padding: 1.25rem 1.5rem;
+      margin: 2rem 0;
+      border-radius: var(--radius-lg);
+      background:
+        linear-gradient(135deg, rgba(200, 205, 211, 0.12) 0%, rgba(8, 8, 8, 0.95) 60%),
+        var(--bg-2);
+      border: 1px solid var(--accent-border);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 16px 40px -16px rgba(0, 0, 0, 0.6);
+    }
+
+    .banner strong {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-hi);
+      margin-bottom: 0.35rem;
+      letter-spacing: -0.01em;
+    }
+
+    .banner p {
+      margin: 0;
+      color: var(--text-mid);
+      font-size: 0.9rem;
+      max-width: 50ch;
+      line-height: 1.6;
+    }
+
+    .banner .btn {
+      background: linear-gradient(180deg, var(--accent-hi) 0%, var(--accent) 100%);
+      color: #0a0a0a;
+      border-color: rgba(255, 255, 255, 0.22);
+      flex-shrink: 0;
+    }
+
+    .banner .btn:hover {
+      background: linear-gradient(180deg, #ffffff 0%, #d1d5db 100%);
+      color: #0a0a0a;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      max-height: 280px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.75rem;
+    }
+
+    th, td {
+      padding: 0.5rem 0.85rem;
+      text-align: left;
+      border-bottom: 1px solid var(--line-0);
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      font-family: var(--font-display);
+      font-size: 0.6875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-hi);
+      font-weight: 600;
+      background: var(--bg-2);
+    }
+
+    td { color: var(--text-mid); }
+    td.num, th:nth-child(n+2) {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+    }
+
+    tbody tr:hover td { background: rgba(255,255,255,0.02); }
+    .muted { color: var(--text-lo); }
+
+    footer {
+      margin-top: 2.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--line-0);
+      font-size: 0.75rem;
+      color: var(--text-lo);
+      line-height: 1.8;
+    }
+
+    footer a { color: var(--text-mid); }
+    footer a:hover { color: var(--accent); }
+
+    @media (max-width: 640px) {
+      #chart { height: 300px; }
+      .topbar { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+      h1 { max-width: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-bg" aria-hidden="true"></div>
+
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">GetData<span>· sample</span></div>
+      <nav class="topbar-links">
+        <a href="https://github.com/ork-ad/us2000-1w-ohlcv-index-historical-data">GitHub</a>
+        <a href="https://ork.ad/">ork.ad</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <div class="pill-row">
+        <span class="pill sym">US2000</span>
+        <span class="pill">1w OHLCV</span>
+        <span class="pill">Stock index</span>
+        <span class="pill">Weekly · Sunday</span>
+      </div>
+      <h1>Russell 2000</h1>
+      <p class="lead">Global cash and extended index sessions — Asia, Europe and US coverage, not US-hours only. Free evaluation sample — <strong>105</strong> candles on GitHub; full archive <strong>104</strong> rows on <a href="https://ork.ad/">ork.ad</a>. Full datasets on ork.ad are updated every Sunday. GitHub samples are refreshed weekly (every Sunday), in sync with ork.ad.</p>
+      <p class="update-badge">Data update every Sunday</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="https://ork.ad/">Get full dataset on ork.ad</a>
+        <a class="btn btn-ghost" href="https://github.com/ork-ad/us2000-1w-ohlcv-index-historical-data/blob/main/US2000_1w.csv">Download sample CSV</a>
+      </div>
+    </section>
+
+    <div class="stats">
+      <div class="stat"><label>Sample rows</label><strong>105</strong><small>2024-07-01 → 2026-06-29</small></div>
+      <div class="stat"><label>Full archive</label><strong>104</strong><small>Production dataset</small></div>
+      <div class="stat"><label>Full period</label><strong style="font-size:1rem">2024-07-08</strong><small>→ 2026-06-29</small></div>
+      <div class="stat"><label>Updates</label><strong>Weekly</strong><small>Every Sunday · ork.ad + GitHub</small></div>
+      <div class="stat"><label>Timeframe</label><strong>1 week</strong><small>OHLCV CSV sample</small></div>
+    </div>
+
+    <div class="panel-wrap">
+      <section class="panel" aria-label="OHLC candlestick chart">
+        <div class="panel-head">
+          <div>
+            <h2>US2000 · candlestick preview</h2>
+            <div class="sub">Last 320 bars from the GitHub sample</div>
+          </div>
+        </div>
+        <div class="ohlc-bar" id="ohlcHover">
+          <span>O <b id="hO">—</b></span>
+          <span>H <b id="hH">—</b></span>
+          <span>L <b id="hL">—</b></span>
+          <span>C <b id="hC">—</b></span>
+          <span>Vol <b id="hV">—</b></span>
+          <span>Time <b id="hT">—</b></span>
+        </div>
+        <div id="chart"></div>
+        <div id="volume-chart"></div>
+      </section>
+    </div>
+
+    <aside class="banner">
+      <div>
+        <strong>Need the complete history?</strong>
+        <p>Download the full US2000 1w archive (104 rows) on ork.ad — built for backtesting &amp; algo trading.</p>
+      </div>
+      <a class="btn" href="https://ork.ad/">Open ork.ad →</a>
+    </aside>
+
+    <div class="panel-wrap">
+      <section class="panel">
+        <div class="panel-head"><h2>Sample data</h2><span class="sub">US2000_1w.csv</span></div>
+        <div class="table-wrap">
+          <table><thead><tr><th>time</th><th>open</th><th>high</th><th>low</th><th>close</th><th>volume</th></tr></thead><tbody><tr><td>2024-07-01T00:00:00Z</td><td class="num">2049.13</td><td class="num">2060.491</td><td class="num">2014.97</td><td class="num">2020.53</td><td class="num">419760.0</td></tr><tr><td>2024-07-08T00:00:00Z</td><td class="num">2020.53</td><td class="num">2169.322</td><td class="num">2019.82</td><td class="num">2162.02</td><td class="num">563214.0</td></tr><tr><td>2024-07-15T00:00:00Z</td><td class="num">2162.02</td><td class="num">2287.853</td><td class="num">2158.672</td><td class="num">2196.102</td><td class="num">831127.0</td></tr><tr><td>2024-07-22T00:00:00Z</td><td class="num">2196.102</td><td class="num">2275.723</td><td class="num">2174.002</td><td class="num">2269.063</td><td class="num">904524.0</td></tr><tr><td>2024-07-29T00:00:00Z</td><td class="num">2269.063</td><td class="num">2308.123</td><td class="num">2066.121</td><td class="num">2071.621</td><td class="num">1061704.0</td></tr><tr><td>2024-08-05T00:00:00Z</td><td class="num">2071.621</td><td class="num">2103.921</td><td class="num">1982.98</td><td class="num">2081.321</td><td class="num">1343849.0</td></tr><tr><td>2024-08-12T00:00:00Z</td><td class="num">2081.321</td><td class="num">2156.392</td><td class="num">2054.52</td><td class="num">2148.521</td><td class="num">817267.0</td></tr><tr><td>2024-08-19T00:00:00Z</td><td class="num">2148.521</td><td class="num">2231.632</td><td class="num">2137.371</td><td class="num">2222.722</td><td class="num">854742.0</td></tr><tr><td>2024-08-26T00:00:00Z</td><td class="num">2222.722</td><td class="num">2243.182</td><td class="num">2179.202</td><td class="num">2215.512</td><td class="num">944228.0</td></tr><tr><td>2024-09-02T00:00:00Z</td><td class="num">2215.512</td><td class="num">2219.982</td><td class="num">2082.721</td><td class="num">2087.951</td><td class="num">995811.0</td></tr><tr><td>2024-09-09T00:00:00Z</td><td class="num">2087.951</td><td class="num">2195.832</td><td class="num">2055.981</td><td class="num">2193.662</td><td class="num">948880.0</td></tr><tr><td>2024-09-16T00:00:00Z</td><td class="num">2193.662</td><td class="num">2282.093</td><td class="num">2175.362</td><td class="num">2243.412</td><td class="num">730319.0</td></tr><tr><td>2024-09-23T00:00:00Z</td><td class="num">2243.412</td><td class="num">2251.703</td><td class="num">2199.622</td><td class="num">2232.512</td><td class="num">686904.0</td></tr><tr><td>2024-09-30T00:00:00Z</td><td class="num">2232.512</td><td class="num">2240.012</td><td class="num">2172.272</td><td class="num">2216.502</td><td class="num">858023.0</td></tr><tr><td>2024-10-07T00:00:00Z</td><td class="num">2216.502</td><td class="num">2238.272</td><td class="num">2166.952</td><td class="num">2232.602</td><td class="num">632521.0</td></tr></tbody></table>
+        </div>
+      </section>
+    </div>
+
+    <footer>
+      GetData · GitHub Pages sample ·
+      Weekly update every Sunday ·
+      <a href="https://ork.ad/">Full data on ork.ad</a> ·
+      Updated 2026-07-04 UTC ·
+      <a href="https://github.com/ork-ad/us2000-1w-ohlcv-index-historical-data">Repository</a> ·
+      <a href="https://github.com/ork-ad/us2000-1w-ohlcv-index-historical-data/blob/main/US2000_1w.csv">Raw CSV</a>
+    </footer>
+  </div>
+
+  <script>
+    const BARS = [{"time":1719792000,"open":2049.13,"high":2060.491,"low":2014.97,"close":2020.53,"volume":419760.0},{"time":1720396800,"open":2020.53,"high":2169.322,"low":2019.82,"close":2162.02,"volume":563214.0},{"time":1721001600,"open":2162.02,"high":2287.853,"low":2158.672,"close":2196.102,"volume":831127.0},{"time":1721606400,"open":2196.102,"high":2275.723,"low":2174.002,"close":2269.063,"volume":904524.0},{"time":1722211200,"open":2269.063,"high":2308.123,"low":2066.121,"close":2071.621,"volume":1061704.0},{"time":1722816000,"open":2071.621,"high":2103.921,"low":1982.98,"close":2081.321,"volume":1343849.0},{"time":1723420800,"open":2081.321,"high":2156.392,"low":2054.52,"close":2148.521,"volume":817267.0},{"time":1724025600,"open":2148.521,"high":2231.632,"low":2137.371,"close":2222.722,"volume":854742.0},{"time":1724630400,"open":2222.722,"high":2243.182,"low":2179.202,"close":2215.512,"volume":944228.0},{"time":1725235200,"open":2215.512,"high":2219.982,"low":2082.721,"close":2087.951,"volume":995811.0},{"time":1725840000,"open":2087.951,"high":2195.832,"low":2055.981,"close":2193.662,"volume":948880.0},{"time":1726444800,"open":2193.662,"high":2282.093,"low":2175.362,"close":2243.412,"volume":730319.0},{"time":1727049600,"open":2243.412,"high":2251.703,"low":2199.622,"close":2232.512,"volume":686904.0},{"time":1727654400,"open":2232.512,"high":2240.012,"low":2172.272,"close":2216.502,"volume":858023.0},{"time":1728259200,"open":2216.502,"high":2238.272,"low":2166.952,"close":2232.602,"volume":632521.0},{"time":1728864000,"open":2232.602,"high":2297.853,"low":2226.212,"close":2286.163,"volume":584600.0},{"time":1729468800,"open":2286.163,"high":2286.303,"low":2194.822,"close":2220.672,"volume":551910.0},{"time":1730073600,"open":2220.672,"high":2267.653,"low":2189.132,"close":2199.052,"volume":701362.0},{"time":1730678400,"open":2199.052,"high":2431.564,"low":2195.62,"close":2429.904,"volume":862446.0},{"time":1731283200,"open":2429.904,"high":2447.424,"low":2299.033,"close":2310.773,"volume":810700.0},{"time":1731888000,"open":2310.773,"high":2442.694,"low":2276.163,"close":2431.82,"volume":780848.0},{"time":1732492800,"open":2431.82,"high":2471.495,"low":2413.554,"close":2439.32,"volume":494961.0},{"time":1733097600,"open":2439.32,"high":2449.914,"low":2387.884,"close":2414.124,"volume":503292.0},{"time":1733702400,"open":2414.124,"high":2432.774,"low":2335.413,"close":2355.414,"volume":520710.0},{"time":1734307200,"open":2355.414,"high":2373.274,"low":2190.782,"close":2260.413,"volume":924522.0},{"time":1734912000,"open":2260.413,"high":2285.933,"low":2218.662,"close":2246.632,"volume":546452.0},{"time":1735516800,"open":2246.632,"high":2272.973,"low":2201.372,"close":2270.533,"volume":736990.0},{"time":1736121600,"open":2270.533,"high":2299.073,"low":2173.032,"close":2184.322,"volume":893838.0},{"time":1736726400,"open":2184.322,"high":2295.22,"low":2160.192,"close":2272.673,"volume":913095.0},{"time":1737331200,"open":2272.673,"high":2325.753,"low":2247.512,"close":2297.403,"volume":620686.0},{"time":1737936000,"open":2297.403,"high":2325.02,"low":2189.852,"close":2215.772,"volume":961418.0},{"time":1738540800,"open":2215.772,"high":2328.683,"low":2208.662,"close":2284.863,"volume":927696.0},{"time":1739145600,"open":2284.863,"high":2299.563,"low":2225.432,"close":2282.233,"volume":656318.0},{"time":1739750400,"open":2282.233,"high":2296.783,"low":2192.092,"close":2206.402,"volume":617134.0},{"time":1740355200,"open":2206.402,"high":2216.002,"low":2126.361,"close":2184.622,"volume":1149459.0},{"time":1740960000,"open":2184.622,"high":2185.82,"low":2032.06,"close":2054.911,"volume":1824452.0},{"time":1741564800,"open":2054.911,"high":2076.531,"low":1984.12,"close":2028.02,"volume":1766667.0},{"time":1742169600,"open":2028.02,"high":2096.151,"low":2023.37,"close":2074.261,"volume":1201708.0},{"time":1742774400,"open":2074.261,"high":2113.371,"low":2001.62,"close":2009.08,"volume":841388.0},{"time":1743379200,"open":2009.08,"high":2079.471,"low":1701.067,"close":1738.567,"volume":2111450.0},{"time":1743984000,"open":1738.567,"high":1939.029,"low":1699.727,"close":1865.179,"volume":3405360.0},{"time":1744588800,"open":1865.179,"high":1906.859,"low":1840.068,"close":1875.999,"volume":1419182.0},{"time":1745193600,"open":1875.999,"high":1971.79,"low":1821.958,"close":1939.089,"volume":1405287.0},{"time":1745798400,"open":1939.089,"high":2027.28,"low":1921.449,"close":2007.17,"volume":1241918.0},{"time":1746403200,"open":2007.17,"high":2073.501,"low":1970.73,"close":2062.111,"volume":1128768.0},{"time":1747008000,"open":2062.111,"high":2133.771,"low":2059.851,"close":2098.921,"volume":874451.0},{"time":1747612800,"open":2098.921,"high":2111.72,"low":1976.99,"close":2060.551,"volume":1146106.0},{"time":1748217600,"open":2060.551,"high":2127.151,"low":2047.4,"close":2055.491,"volume":904268.0},{"time":1748822400,"open":2055.491,"high":2138.251,"low":2039.17,"close":2134.281,"volume":1058097.0},{"time":1749427200,"open":2134.281,"high":2192.222,"low":2070.031,"close":2103.671,"volume":971582.0},{"time":1750032000,"open":2103.671,"high":2143.131,"low":2074.601,"close":2103.361,"volume":796744.0},{"time":1750636800,"open":2103.361,"high":2191.972,"low":2085.151,"close":2181.682,"volume":755604.0},{"time":1751241600,"open":2181.682,"high":2261.783,"low":2158.882,"close":2235.232,"volume":610440.0},{"time":1751846400,"open":2235.232,"high":2278.753,"low":2200.582,"close":2220.772,"volume":773929.0},{"time":1752451200,"open":2220.772,"high":2271.523,"low":2185.702,"close":2245.032,"volume":876081.0},{"time":1753056000,"open":2245.032,"high":2285.513,"low":2222.952,"close":2276.353,"volume":700540.0},{"time":1753660800,"open":2276.353,"high":2283.423,"low":2138.321,"close":2164.052,"volume":1063767.0},{"time":1754265600,"open":2164.052,"high":2247.172,"low":2163.092,"close":2223.552,"volume":980999.0},{"time":1754870400,"open":2223.552,"high":2331.563,"low":2213.72,"close":2291.283,"volume":792852.0},{"time":1755475200,"open":2291.283,"high":2369.424,"low":2252.063,"close":2366.154,"volume":955431.0},{"time":1756080000,"open":2366.154,"high":2394.334,"low":2326.12,"close":2370.564,"volume":741660.0},{"time":1756684800,"open":2370.564,"high":2410.334,"low":2323.923,"close":2392.764,"volume":1013263.0},{"time":1757289600,"open":2392.764,"high":2422.964,"low":2367.814,"close":2397.834,"volume":746332.0},{"time":1757894400,"open":2397.834,"high":2481.385,"low":2387.034,"close":2449.22,"volume":926720.0},{"time":1758499200,"open":2449.22,"high":2494.075,"low":2396.534,"close":2438.254,"volume":984170.0},{"time":1759104000,"open":2438.254,"high":2500.025,"low":2409.434,"close":2484.015,"volume":945114.0},{"time":1759708800,"open":2484.015,"high":2504.185,"low":2392.754,"close":2426.494,"volume":1028493.0},{"time":1760313600,"open":2426.494,"high":2547.575,"low":2418.574,"close":2455.285,"volume":1799253.0},{"time":1760918400,"open":2455.285,"high":2554.73,"low":2426.234,"close":2538.415,"volume":1061390.0},{"time":1761523200,"open":2538.415,"high":2545.065,"low":2454.685,"close":2489.855,"volume":1107714.0},{"time":1762128000,"open":2489.855,"high":2492.455,"low":2379.734,"close":2449.654,"volume":1449441.0},{"time":1762732800,"open":2449.654,"high":2481.395,"low":2347.893,"close":2392.884,"volume":1519183.0},{"time":1763337600,"open":2392.884,"high":2407.124,"low":2296.153,"close":2383.024,"volume":2695660.0},{"time":1763942400,"open":2383.024,"high":2503.675,"low":2366.264,"close":2496.395,"volume":863529.0},{"time":1764547200,"open":2496.395,"high":2541.645,"low":2465.395,"close":2524.265,"volume":1161161.0},{"time":1765152000,"open":2524.265,"high":2603.616,"low":2514.885,"close":2551.366,"volume":1129775.0},{"time":1765756800,"open":2551.366,"high":2576.146,"low":2488.565,"close":2539.015,"volume":1226348.0},{"time":1766361600,"open":2539.015,"high":2573.016,"low":2526.245,"close":2540.735,"volume":396156.0},{"time":1766966400,"open":2540.735,"high":2543.445,"low":2480.32,"close":2510.905,"volume":556811.0},{"time":1767571200,"open":2510.905,"high":2637.066,"low":2504.985,"close":2624.046,"volume":953981.0},{"time":1768176000,"open":2624.046,"high":2693.307,"low":2603.646,"close":2660.487,"volume":1017759.0},{"time":1768780800,"open":2660.487,"high":2738.447,"low":2619.886,"close":2654.467,"volume":1144918.0},{"time":1769385600,"open":2654.467,"high":2688.537,"low":2597.586,"close":2615.936,"volume":1382430.0},{"time":1769990400,"open":2615.936,"high":2683.627,"low":2560.246,"close":2679.777,"volume":2123779.0},{"time":1770595200,"open":2679.777,"high":2714.037,"low":2601.716,"close":2648.806,"volume":1725136.0},{"time":1771200000,"open":2648.806,"high":2691.007,"low":2608.866,"close":2655.767,"volume":1421938.0},{"time":1771804800,"open":2655.767,"high":2680.397,"low":2589.996,"close":2591.046,"volume":1435865.0},{"time":1772409600,"open":2591.046,"high":2660.647,"low":2419.314,"close":2432.664,"volume":2374991.0},{"time":1773014400,"open":2432.664,"high":2592.726,"low":2415.264,"close":2487.555,"volume":2387712.0},{"time":1773619200,"open":2487.555,"high":2547.105,"low":2408.394,"close":2433.354,"volume":1735096.0},{"time":1774224000,"open":2433.354,"high":2559.516,"low":2400.594,"close":2422.584,"volume":1972399.0},{"time":1774828800,"open":2422.584,"high":2542.735,"low":2396.114,"close":2509.385,"volume":1813535.0},{"time":1775433600,"open":2509.385,"high":2651.907,"low":2508.685,"close":2592.03,"volume":1499670.0},{"time":1776038400,"open":2592.03,"high":2797.83,"low":2589.196,"close":2748.277,"volume":1003257.0},{"time":1776643200,"open":2748.277,"high":2819.508,"low":2740.237,"close":2777.078,"volume":1616890.0},{"time":1777248000,"open":2777.078,"high":2824.008,"low":2716.997,"close":2817.498,"volume":1273248.0},{"time":1777852800,"open":2817.498,"high":2910.269,"low":2778.348,"close":2847.488,"volume":1424428.0},{"time":1778457600,"open":2847.488,"high":2889.279,"low":2774.93,"close":2783.05566,"volume":1527657.0},{"time":1779062400,"open":2783.05566,"high":2896.999,"low":2723.127,"close":2893.949,"volume":2400261.0},{"time":1779667200,"open":2893.949,"high":2947.749,"low":2891.339,"close":2924.439,"volume":1120693.0},{"time":1780272000,"open":2924.439,"high":2945.489,"low":2805.968,"close":2830.468,"volume":1457792.0},{"time":1780876800,"open":2830.468,"high":3000.41,"low":2792.098,"close":2991.16,"volume":3114327.0},{"time":1781481600,"open":2991.16,"high":3003.69,"low":2909.739,"close":2953.25,"volume":1514414.0},{"time":1782086400,"open":2953.25,"high":3042.37,"low":2945.309,"close":3022.38,"volume":2155800.0},{"time":1782691200,"open":3022.38,"high":3049.95,"low":2970.4,"close":2994.65,"volume":1417702.0}];
+
+    const CHART = {
+      layoutBgTop: '#181b22',
+      layoutBgBottom: '#000000',
+      textColor: 'rgba(255, 255, 255, 0.7)',
+      gridVert: 'rgba(255, 255, 255, 0.02)',
+      gridHorz: 'rgba(255, 255, 255, 0.03)',
+      scaleBorder: 'rgba(255, 255, 255, 0.08)',
+      upColor: '#00c853',
+      downColor: '#ff1744',
+      volUp: 'rgba(0, 200, 83, 0.35)',
+      volDown: 'rgba(255, 23, 68, 0.35)',
+    };
+
+    const fmt = (n, d=5) => (n == null || isNaN(n)) ? '—' : Number(n).toFixed(d);
+    const fmtVol = (n) => (n == null || isNaN(n)) ? '—' : Number(n).toLocaleString(undefined, {maximumFractionDigits: 0});
+
+    function initChart(containerId, height, opts) {
+      const el = document.getElementById(containerId);
+      const chart = LightweightCharts.createChart(el, {
+        width: el.clientWidth,
+        height,
+        layout: {
+          background: {
+            type: LightweightCharts.ColorType.VerticalGradient,
+            topColor: CHART.layoutBgTop,
+            bottomColor: CHART.layoutBgBottom,
+          },
+          textColor: CHART.textColor,
+          fontFamily: "'Clash Display', -apple-system, sans-serif",
+          attributionLogo: false,
+        },
+        grid: { vertLines: { color: CHART.gridVert }, horzLines: { color: CHART.gridHorz } },
+        rightPriceScale: { borderColor: CHART.scaleBorder, textColor: CHART.textColor },
+        leftPriceScale: { textColor: CHART.textColor },
+        timeScale: { borderColor: CHART.scaleBorder, timeVisible: true, secondsVisible: false, textColor: CHART.textColor },
+        crosshair: { mode: LightweightCharts.CrosshairMode.Normal, vertLine: { color: 'rgba(255,255,255,0.25)' }, horzLine: { color: 'rgba(255,255,255,0.25)' } },
+        ...opts,
+      });
+      const ro = new ResizeObserver(() => chart.applyOptions({ width: el.clientWidth }));
+      ro.observe(el);
+      return chart;
+    }
+
+    const mainChart = initChart('chart', 420);
+    const candles = mainChart.addCandlestickSeries({
+      upColor: CHART.upColor,
+      downColor: CHART.downColor,
+      borderUpColor: CHART.upColor,
+      borderDownColor: CHART.downColor,
+      wickUpColor: CHART.upColor,
+      wickDownColor: CHART.downColor,
+    });
+    candles.setData(BARS.map(b => ({
+      time: b.time, open: b.open, high: b.high, low: b.low, close: b.close,
+    })));
+
+    const volChart = initChart('volume-chart', 100, {
+      timeScale: { visible: false, textColor: CHART.textColor },
+      rightPriceScale: { scaleMargins: { top: 0.1, bottom: 0 }, textColor: CHART.textColor },
+    });
+    const volume = volChart.addHistogramSeries({
+      priceFormat: { type: 'volume' },
+      priceScaleId: 'right',
+    });
+    volume.setData(BARS.map(b => ({
+      time: b.time,
+      value: b.volume,
+      color: b.close >= b.open ? CHART.volUp : CHART.volDown,
+    })));
+
+    mainChart.timeScale().subscribeVisibleLogicalRangeChange(range => {
+      if (range) volChart.timeScale().setVisibleLogicalRange(range);
+    });
+    volChart.timeScale().subscribeVisibleLogicalRangeChange(range => {
+      if (range) mainChart.timeScale().setVisibleLogicalRange(range);
+    });
+
+    function setHover(bar) {
+      const o = document.getElementById('hO');
+      const h = document.getElementById('hH');
+      const l = document.getElementById('hL');
+      const c = document.getElementById('hC');
+      const v = document.getElementById('hV');
+      const t = document.getElementById('hT');
+      const data = bar || (BARS.length ? BARS[BARS.length - 1] : null);
+      if (!data) {
+        [o, h, l, c, v, t].forEach(el => el.textContent = '—');
+        c.className = '';
+        return;
+      }
+      const raw = BARS.find(b => b.time === data.time) || data;
+      o.textContent = fmt(data.open);
+      h.textContent = fmt(data.high);
+      l.textContent = fmt(data.low);
+      c.textContent = fmt(data.close);
+      c.className = data.close >= data.open ? 'up' : 'down';
+      v.textContent = fmtVol(raw.volume);
+      const d = new Date(data.time * 1000);
+      t.textContent = d.toISOString().slice(0, 16).replace('T', ' ');
+    }
+
+    mainChart.subscribeCrosshairMove(param => {
+      if (!param.time) {
+        setHover(null);
+        return;
+      }
+      const bar = param.seriesData.get(candles);
+      setHover(bar || null);
+    });
+
+    setHover(null);
+
+    mainChart.timeScale().fitContent();
+    volChart.timeScale().fitContent();
+  </script>
+</body>
+</html>
